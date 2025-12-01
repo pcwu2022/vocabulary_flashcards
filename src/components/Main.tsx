@@ -37,15 +37,34 @@ const Main = () => {
     let [randWord, randLevel] = getRandomWord(review);
     getAPI(randWord)
       .then((dict) => {
-        setNextData(dict);
-        setNextWord(randWord);
-        setNextLevel(randLevel);
-        // console.log("Current: ", nextData, nextWord, nextLevel);
-        // console.log("Next: ", dict, randWord, randLevel);
+        // If this call is intended to set the "current" word, set it directly
+        // and then prefetch a different "next" word so current and next differ.
         if (current){
           setData(dict);
           setWord(randWord);
           setLevel(randLevel);
+
+          // Prefetch a different next word (avoid duplicating the current word)
+          let tries = 0;
+          const maxTries = 5;
+          let [nextRand, nextLevel] = getRandomWord(review);
+          while (nextRand === randWord && tries < maxTries){
+            [nextRand, nextLevel] = getRandomWord(review);
+            tries += 1;
+          }
+          getAPI(nextRand)
+            .then((nextDict) => {
+              setNextData(nextDict);
+              setNextWord(nextRand);
+              setNextLevel(nextLevel);
+            })
+            .catch(() => {
+              // If prefetch fails, leave next as empty and it will be retried later
+            });
+        } else {
+          setNextData(dict);
+          setNextWord(randWord);
+          setNextLevel(randLevel);
         }
       })
       .catch((err) => {
