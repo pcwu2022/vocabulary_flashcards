@@ -1,13 +1,11 @@
-import React, { useContext, useEffect, useState, createContext } from 'react';
+import React from 'react';
 import './App.css';
-import Login from './components/Login';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { ContextData, UserData } from './types/types';
 import Main from './components/Main';
 
 function App() {
-  const [login, setLogin] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
+  // App is now a static, localStorage-only site — always show Main
   const theme = createTheme({
     palette: {
       mode: "dark",
@@ -24,16 +22,7 @@ function App() {
             backgroundColor: theme.palette.background.default
           }}
         >  
-          {
-            (!login)?<Login
-              username={username} setUsername={setUsername} setLogin={setLogin}
-            />
-            :<>
-              <Main 
-                
-              />
-            </>
-          }
+          <Main />
         </div>
       </ThemeProvider>
     </div>

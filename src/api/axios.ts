@@ -1,10 +1,7 @@
 import axios from "axios";
 import { DictionaryData, UserData, UserDataIndex } from "../types/types";
 import wordbase from "../database/wordbase.json";
-import { redirect } from "react-router-dom";
-
-// const database = "https://pcwu-service.onrender.com";
-const database = "http://localhost:3001";
+// No remote database for static/local only site
 const dictAPI = "https://api.dictionaryapi.dev/api/v2/entries/en";
 
 let globalUsername = "";
@@ -21,95 +18,32 @@ let userData: UserData = {
     count: 0
 };
 
-let connection = true;
-
-/******************** USER INFORMATION ******************/
-
-const testFetch = (message = false) => {
-    axios.get(`${database}/test/`, {
-        timeout: 5000
-    })
-        .then((response) => {
-            connection = true;
-            console.log("Successfully connected to the database");
-        })
-        .catch((err) => {
-            if (message){
-                alert("Cannot connect to database. Data is stored in local storage.");
-            }
-            connection = false;
-        })
-}
-
-const dataInit = (username: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-        if (connection){
-            axios.get(`${database}/volcabulary/${username}`)
-                .then((res) => {
-                    if (res.data.data === null){
-                        resolve(false); // no user present
-                        console.log("no user present");
-                    } else {
-                        userData = res.data.data;
-                        globalUsername = username;
-                        resolve(true); // user present
-                        console.log(userData);
-                    }
-                })
-                .catch((err) => {
-                    console.error(err)
-                    resolve(false);
-                });
-        } else {
-            if (localStorage.getItem("username") === null){
-                resolve(false);
-            } else {
-                let data = localStorage.getItem("userData");
-                if (data !== null){
-                    userData = JSON.parse(data);
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            }
-        }
-    });
-}
-
-const createUser = (username: string) => {
-    let newUser = userData;
-    globalUsername = username;
-    localStorage.setItem("username", username);
-    if (connection){
-        axios.post(`${database}/volcabulary/${username}/`, newUser)
-            .catch((err) => console.error(err));
-    } else {
-        localStorage.setItem("userData", JSON.stringify(userData));
-    }
-}
-
 let collectLevel: Array<number> = [];
 const saveUser = () => {
-    if (globalUsername === ""){
-        let newUsername = localStorage.getItem("username");
-        if (newUsername !== null){
-            globalUsername = newUsername;
-        } else {
-            redirect("/");
-        }
-    }
-    collectLevel[userData.count-1] = userData.level;
-    // if (userData.count%10 === 0){
-    //     console.log(collectLevel);
-    // }
-    if (connection){
-        axios.post(`${database}/volcabulary/${globalUsername}/`, userData)
-            .catch((err) => console.error(err));
-    } else {
-        testFetch();
-    }
+    // Persist progress to localStorage only (static site)
+    collectLevel[userData.count - 1] = userData.level;
     localStorage.setItem("username", globalUsername);
     localStorage.setItem("userData", JSON.stringify(userData));
+}
+
+const resetProgress = () => {
+    // Reset runtime userData and remove persisted items
+    userData = {
+        learning1: [],
+        learning2: [],
+        learning3: [],
+        learning4: [],
+        learning5: [],
+        learnt: [],
+        known: [],
+        discarded: [],
+        level: 1,
+        count: 0
+    };
+    globalUsername = "";
+    collectLevel = [];
+    localStorage.removeItem("username");
+    localStorage.removeItem("userData");
 }
 
 /******************** ALGORITHM ******************/
@@ -362,8 +296,6 @@ const getAPI = (word: string): Promise<DictionaryData> => {
 /******************** EXPORT ******************/
 
 export {
-    dataInit,
-    createUser,
     getRandomWord,
     saveUser,
     saveWord,
@@ -373,5 +305,5 @@ export {
     forgetWord,
     getAPI,
     canReview,
-    testFetch
+    resetProgress
 }

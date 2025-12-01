@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Flashcard from './Flashcard';
 import { DictionaryData, UserDataIndex } from '../types/types';
-import { canReview, checkWord, discardWord, forgetWord, getAPI, getRandomWord, rememberWord, saveWord, testFetch } from '../api/axios';
+import { canReview, checkWord, discardWord, forgetWord, getAPI, getRandomWord, rememberWord, saveWord, resetProgress } from '../api/axios';
 import { Button, Typography } from '@mui/material';
 
 const Main = () => {
@@ -80,7 +80,7 @@ const Main = () => {
   }, [dummy2]);
 
   useEffect(() => {
-    testFetch(true);
+    // No server connectivity in static/local mode.
   }, [])
   return (
     <div className='p-4'>
@@ -101,7 +101,14 @@ const Main = () => {
             {(review)?"Back to Random Generation":"View My Dictionary"}
           </Button>:<></>
         }
-        
+        <Button variant='outlined' size="small" sx={{ ml: 2 }}
+          onClick={() => {
+            if (window.confirm("Clear all saved progress from local storage and restart?")){
+              resetProgress();
+              reload();
+            }
+          }}
+        >Restart</Button>
       </div>
       <div className='flex align-center justify-center mt-4 p-4'>
         <Flashcard

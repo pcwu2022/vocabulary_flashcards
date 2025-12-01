@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactCardFlip from 'react-card-flip';
 import { Card, Button, CardActions, CardContent, Typography, Box, IconButton, Tooltip } from '@mui/material';
-import { getRandomWord } from '../api/axios';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
